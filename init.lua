@@ -907,6 +907,11 @@ require('lazy').setup({
     ---@module 'render-markdown'
     ---@type render.md.UserConfig
     opts = {},
+    init = function()
+      require('render-markdown').setup {
+        completions = { lsp = { enabled = true } },
+      }
+    end,
   },
 
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
