@@ -1,95 +1,4 @@
---[[
-
-=====================================================================
-==================== READ THIS BEFORE CONTINUING ====================
-=====================================================================
-========                                    .-----.          ========
-========         .----------------------.   | === |          ========
-========         |.-""""""""""""""""""-.|   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||   KICKSTART.NVIM   ||   |-----|          ========
-========         ||                    ||   | === |          ========
-========         ||                    ||   |-----|          ========
-========         ||:Tutor              ||   |:::::|          ========
-========         |'-..................-'|   |____o|          ========
-========         `"")----------------(""`   ___________      ========
-========        /::::::::::|  |::::::::::\  \ no mouse \     ========
-========       /:::========|  |==hjkl==:::\  \ required \    ========
-========      '""""""""""""'  '""""""""""""'  '""""""""""'   ========
-========                                                     ========
-=====================================================================
-=====================================================================
-
-What is Kickstart?
-
-  Kickstart.nvim is *not* a distribution.
-
-  Kickstart.nvim is a starting point for your own configuration.
-    The goal is that you can read every line of code, top-to-bottom, understand
-    what your configuration is doing, and modify it to suit your needs.
-
-    Once you've done that, you can start exploring, configuring and tinkering to
-    make Neovim your own! That might mean leaving Kickstart just the way it is for a while
-    or immediately breaking it into modular pieces. It's up to you!
-
-    If you don't know anything about Lua, I recommend taking some time to read through
-    a guide. One possible example which will only take 10-15 minutes:
-      - https://learnxinyminutes.com/docs/lua/
-
-    After understanding a bit more about Lua, you can use `:help lua-guide` as a
-    reference for how Neovim integrates Lua.
-    - :help lua-guide
-    - (or HTML version): https://neovim.io/doc/user/lua-guide.html
-
-Kickstart Guide:
-
-  TODO: The very first thing you should do is to run the command `:Tutor` in Neovim.
-
-    If you don't know what this means, type the following:
-      - <escape key>
-      - :
-      - Tutor
-      - <enter key>
-
-    (If you already know the Neovim basics, you can skip this step.)
-
-  Once you've completed that, you can continue working through **AND READING** the rest
-  of the kickstart init.lua.
-
-  Next, run AND READ `:help`.
-    This will open up a help window with some basic information
-    about reading, navigating and searching the builtin help documentation.
-
-    This should be the first place you go to look when you're stuck or confused
-    with something. It's one of my favorite Neovim features.
-
-    MOST IMPORTANTLY, we provide a keymap "<space>sh" to [s]earch the [h]elp documentation,
-    which is very useful when you're not exactly sure of what you're looking for.
-
-  I have left several `:help X` comments throughout the init.lua
-    These are hints about where to find more information about the relevant settings,
-    plugins or Neovim features used in Kickstart.
-
-   NOTE: Look for lines like this
-
-    Throughout the file. These are for you, the reader, to help you understand what is happening.
-    Feel free to delete them once you know what you're doing, but they should serve as a guide
-    for when you are first encountering a few different constructs in your Neovim config.
-
-If you experience any errors while trying to install kickstart, run `:checkhealth` for more info.
-
-I hope you enjoy your Neovim journey,
-- TJ
-
-P.S. You can delete this when you're done too. It's your config now! :)
---]]
-
--- Kill all trailing whitespaces
--- vim.api.nvim_create_autocmd('BufWritePre', {
---   pattern = '*',
---   command = [[%s/\s\+$//e]],
--- })
-
+-- Auto delete empty white spaces at the end of lines
 vim.api.nvim_create_autocmd('BufWritePre', {
   pattern = '*',
   callback = function()
@@ -351,6 +260,7 @@ require('lazy').setup({
         { '<leader>h', group = 'Git [H]unk', mode = { 'n', 'v' } },
         { '<leader>r', group = '[R]un Code', mode = { 'n', 'v' } },
         { '<leader>m', group = '[M]olten', mode = { 'n', 'v' } },
+        { '<leader>o', group = '[O]bsidian', mode = { 'n', 'v' } },
       },
     },
   },
@@ -507,6 +417,42 @@ require('lazy').setup({
 
       -- Shortcut for searching your Neovim configuration files
       vim.keymap.set('n', '<leader>sn', function() builtin.find_files { cwd = vim.fn.stdpath 'config' } end, { desc = '[S]earch [N]eovim files' })
+    end,
+  },
+
+  {
+    'obsidian-nvim/obsidian.nvim',
+    version = '*', -- use latest release, remove to use latest commit
+    dependencies = {
+      'nvim-lua/plenary.nvim',
+    },
+    cond = function()
+      -- Check if the current file is a Markdown file
+      return vim.bo.filetype == 'markdown' ~= nil
+    end,
+    ---@module 'obsidian'
+    ---@type obsidian.config
+    opts = {
+      frontmatter = {
+        enabled = false,
+      },
+      legacy_commands = false,
+      workspaces = {
+        {
+          name = 'ilaris',
+          path = '/home/gott/Creative/Pen And Paper/Ilaris/Sommerkampagne',
+        },
+      },
+    },
+    config = function(_, opts)
+      require('obsidian').setup(opts)
+      vim.opt.conceallevel = 1
+      vim.keymap.set('n', '<leader>ob', function() vim.cmd 'Obsidian backlinks' end, { desc = '[O]bsidian [B]acklinks' })
+      vim.keymap.set('n', '<leader>oo', function() vim.cmd 'Obsidian open' end, { desc = '[O]bsidian [O]pen' })
+      vim.keymap.set('n', '<leader>on', function() vim.cmd 'Obsidian new' end, { desc = '[O]bsidian [N]ew' })
+      vim.keymap.set('n', '<leader>oq', function() vim.cmd 'Obsidian quick_switch' end, { desc = '[O]bsidian [Q]uick Switch' })
+      vim.keymap.set('n', '<leader>os', function() vim.cmd 'Obsidian search' end, { desc = '[O]bsidian [S]earch' })
+      vim.keymap.set('n', '<leader>ol', function() vim.cmd 'Obsidian links' end, { desc = '[O]bsidian [L]inks' })
     end,
   },
 
@@ -944,10 +890,9 @@ require('lazy').setup({
     opts = {
       backend = 'kitty', -- Kitty will provide the best experience, but you need a compatible terminal
       processor = 'magick_cli', -- or "magick_rock"
-      integrations = {}, -- do whatever you want with image.nvim's integrations
       max_width = nil, -- tweak to preference
       max_height = nil, -- ^
-      max_height_window_percentage = math.huge, -- this is necessary for a good experience
+      max_height_window_percentage = 50, -- this is necessary for a good experience
       max_width_window_percentage = math.huge,
       window_overlap_clear_enabled = true,
       window_overlap_clear_ft_ignore = { 'cmp_menu', 'cmp_docs', '' },
